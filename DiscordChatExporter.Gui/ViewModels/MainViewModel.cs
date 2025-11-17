@@ -4,7 +4,6 @@ using Avalonia;
 using CommunityToolkit.Mvvm.Input;
 using DiscordChatExporter.Gui.Framework;
 using DiscordChatExporter.Gui.Services;
-using DiscordChatExporter.Gui.Utils;
 using DiscordChatExporter.Gui.Utils.Extensions;
 using DiscordChatExporter.Gui.ViewModels.Components;
 
