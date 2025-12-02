@@ -20,11 +20,11 @@ To install this fork, download the [latest release](https://github.com/nulldg/Di
 
 If you already have a copy of DiscordChatExporter and wish to switch to this fork, you can simply overwrite the existing files. Your settings will be preserved.
 
-> **Important**:
+> [!IMPORTANT]
 > To launch the GUI version of the app on MacOS, you need to first remove the downloaded file from quarantine.
 > You can do that by running the following command in the terminal: `xattr -rd com.apple.quarantine DiscordChatExporter.app`.
 
-> **Note**:
+> [!NOTE]
 > If you're unsure which build is right for your system, consult with [this page](https://useragent.cc) to determine your OS and CPU architecture.
 
 ## Features

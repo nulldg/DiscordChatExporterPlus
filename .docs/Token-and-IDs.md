@@ -27,7 +27,7 @@ Prerequisite step: Navigate to [discord.com](https://discord.com) and login.
 3. Type
 
     ```js
-    (webpackChunkdiscord_app.push([[''],{},e=>{m=[];for(let c in e.c)m.push(e.c[c])}]),m).find(m=>m?.exports?.default?.getToken!==void 0).exports.default.getToken()
+    let m;webpackChunkdiscord_app.push([[Math.random()],{},e=>{for(let i in e.c){let x=e.c[i];if(x?.exports?.$8&&x.exports.LP&&x.exports.gK){m=x;break}}}]);m&&console.log("Token:",m.exports.LP());
     ```
 
     into the console and press <kbd>Enter</kbd>. The console will display your user token.
@@ -120,7 +120,7 @@ Prerequisite step: Navigate to [discord.com](https://discord.com) and login.
 1. Type
 
     ```js
-    (webpackChunkdiscord_app.push([[''],{},e=>{m=[];for(let c in e.c)m.push(e.c[c])}]),m).find(m=>m?.exports?.default?.getToken!==void 0).exports.default.getToken()
+    let m;webpackChunkdiscord_app.push([[Math.random()],{},e=>{for(let i in e.c){let x=e.c[i];if(x?.exports?.$8&&x.exports.LP&&x.exports.gK){m=x;break}}}]);m&&console.log("Token:",m.exports.LP());
     ```
 
     into the console and press <kbd>Enter</kbd>. The console will display your user token.
@@ -306,7 +306,7 @@ If you don't have a bot token yet or if you've lost it, follow these steps to re
 > **Tip**:
 > As the token is only shown once, make sure to store it in a safe place. If you lose the token, you will have to reset it again.
 
-> **Warning**:
+> [!WARNING]
 > Resetting the token will invalidate the old one. Any integrations relying on the old token will cease to function until they are updated.
 
 ![https://discord.com/developers/applications/](https://i.imgur.com/soiB8Qc.png)

@@ -32,9 +32,9 @@ public partial record Channel(
 
     public bool IsThread { get; } =
         Kind
-            is ChannelKind.GuildNewsThread
-                or ChannelKind.GuildPublicThread
-                or ChannelKind.GuildPrivateThread;
+        is ChannelKind.GuildNewsThread
+            or ChannelKind.GuildPublicThread
+            or ChannelKind.GuildPrivateThread;
 
     public bool IsEmpty { get; } = LastMessageId is null;
 
