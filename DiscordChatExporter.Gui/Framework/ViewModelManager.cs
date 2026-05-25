@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Gui.ViewModels;

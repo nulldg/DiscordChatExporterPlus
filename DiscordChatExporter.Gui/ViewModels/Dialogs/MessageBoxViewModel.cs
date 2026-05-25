@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using DiscordChatExporter.Gui.Framework;
 
 namespace DiscordChatExporter.Gui.ViewModels.Dialogs;

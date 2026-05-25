@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using CliFx.Binding;
@@ -7,7 +7,7 @@ using DiscordChatExporter.Cli.Commands.Base;
 using DiscordChatExporter.Cli.Commands.Converters;
 using DiscordChatExporter.Cli.Commands.Shared;
 using DiscordChatExporter.Core.Discord;
-using DiscordChatExporter.Core.Utils.Extensions;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Cli.Commands;
 

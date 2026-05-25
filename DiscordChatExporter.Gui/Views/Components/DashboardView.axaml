@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="DiscordChatExporter.Gui.Views.Components.DashboardView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -23,10 +23,10 @@
                         x:Name="TokenValueTextBox"
                         FontSize="16"
                         PasswordChar="*"
+                        PlaceholderText="{Binding LocalizationManager.TokenPlaceholderText}"
                         RevealPassword="{Binding $self.IsFocused}"
                         Text="{Binding Token}"
-                        Theme="{DynamicResource SoloTextBox}"
-                        Watermark="{Binding LocalizationManager.TokenWatermark}">
+                        Theme="{DynamicResource SoloTextBox}">
                         <TextBox.InnerLeftContent>
                             <materialIcons:MaterialIcon
                                 Grid.Column="0"

@@ -2,10 +2,9 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <AssemblyName>DiscordChatExporterPlus</AssemblyName>
-    <ApplicationIcon>..\favicon.ico</ApplicationIcon>
+    <ApplicationIcon>../favicon.ico</ApplicationIcon>
     <PublishTrimmed>true</PublishTrimmed>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -22,14 +21,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AvaloniaResource Include="..\favicon.ico" Link="favicon.ico" />
+    <AvaloniaResource Include="../favicon.ico" Link="favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AsyncImageLoader.Avalonia" />
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Include="Avalonia.Diagnostics" Condition="'$(Configuration)' == 'Debug'" />
     <PackageReference Include="Cogwheel" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="DialogHost.Avalonia" />
@@ -39,12 +37,12 @@
     <PackageReference Include="Material.Icons.Avalonia" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Onova" />
+    <PackageReference Include="PowerKit" PrivateAssets="all" />
     <PackageReference Include="ThisAssembly.Project" PrivateAssets="all" />
-    <PackageReference Include="Tmds.DBus.Protocol" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DiscordChatExporter.Core\DiscordChatExporter.Core.csproj" />
+    <ProjectReference Include="../DiscordChatExporter.Core/DiscordChatExporter.Core.csproj" />
   </ItemGroup>
 
   <Target Name="PublishMacOSBundle" AfterTargets="Publish" Condition="$(PublishMacOSBundle)">

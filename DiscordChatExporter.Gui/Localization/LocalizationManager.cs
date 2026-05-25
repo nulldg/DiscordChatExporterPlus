@@ -3,20 +3,19 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DiscordChatExporter.Gui.Services;
-using DiscordChatExporter.Gui.Utils;
-using DiscordChatExporter.Gui.Utils.Extensions;
+using PowerKit;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui.Localization;
 
 public partial class LocalizationManager : ObservableObject, IDisposable
 {
-    private readonly DisposableCollector _eventRoot = new();
+    private readonly IDisposable _eventSubscription;
 
     public LocalizationManager(SettingsService settingsService)
     {
-        _eventRoot.Add(settingsService.WatchProperty(o => o.Language, v => Language = v, true));
-
-        _eventRoot.Add(
+        _eventSubscription = Disposable.Merge(
+            settingsService.WatchProperty(o => o.Language, v => Language = v, true),
             this.WatchProperty(
                 o => o.Language,
                 _ =>
@@ -66,7 +65,7 @@ public partial class LocalizationManager : ObservableObject, IDisposable
         return $"Missing localization for '{key}'";
     }
 
-    public void Dispose() => _eventRoot.Dispose();
+    public void Dispose() => _eventSubscription.Dispose();
 }
 
 public partial class LocalizationManager
@@ -76,7 +75,7 @@ public partial class LocalizationManager
     public string PullGuildsTooltip => Get();
     public string SettingsTooltip => Get();
     public string LastMessageSentTooltip => Get();
-    public string TokenWatermark => Get();
+    public string TokenPlaceholderText => Get();
 
     // Token instructions (personal account)
     public string TokenPersonalHeader => Get();

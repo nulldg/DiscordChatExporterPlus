@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,15 +10,14 @@ using DiscordChatExporter.Core.Discord;
 using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Core.Exceptions;
 using DiscordChatExporter.Core.Exporting;
-using DiscordChatExporter.Core.Utils.Extensions;
 using DiscordChatExporter.Gui.Framework;
 using DiscordChatExporter.Gui.Localization;
 using DiscordChatExporter.Gui.Models;
 using DiscordChatExporter.Gui.Services;
-using DiscordChatExporter.Gui.Utils;
-using DiscordChatExporter.Gui.Utils.Extensions;
 using Gress;
 using Gress.Completable;
+using PowerKit;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui.ViewModels.Components;
 
@@ -29,7 +28,7 @@ public partial class DashboardViewModel : ViewModelBase
     private readonly DialogManager _dialogManager;
     private readonly SettingsService _settingsService;
 
-    private readonly DisposableCollector _eventRoot = new();
+    private readonly IDisposable _eventSubscription;
     private readonly AutoResetProgressMuxer _progressMuxer;
 
     private DiscordClient? _discord;
@@ -50,14 +49,11 @@ public partial class DashboardViewModel : ViewModelBase
 
         _progressMuxer = Progress.CreateMuxer().WithAutoReset();
 
-        _eventRoot.Add(
+        _eventSubscription = Disposable.Merge(
             Progress.WatchProperty(
                 o => o.Current,
                 _ => OnPropertyChanged(nameof(IsProgressIndeterminate))
-            )
-        );
-
-        _eventRoot.Add(
+            ),
             SelectedChannels.WatchProperty(
                 o => o.Count,
                 _ => ExportCommand.NotifyCanExecuteChanged()
@@ -332,7 +328,7 @@ public partial class DashboardViewModel : ViewModelBase
     {
         if (disposing)
         {
-            _eventRoot.Dispose();
+            _eventSubscription.Dispose();
         }
 
         base.Dispose(disposing);

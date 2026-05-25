@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -7,13 +7,13 @@ using Avalonia.Platform;
 using DiscordChatExporter.Gui.Framework;
 using DiscordChatExporter.Gui.Localization;
 using DiscordChatExporter.Gui.Services;
-using DiscordChatExporter.Gui.Utils;
-using DiscordChatExporter.Gui.Utils.Extensions;
 using DiscordChatExporter.Gui.ViewModels;
 using DiscordChatExporter.Gui.ViewModels.Components;
 using DiscordChatExporter.Gui.ViewModels.Dialogs;
 using Material.Styles.Themes;
 using Microsoft.Extensions.DependencyInjection;
+using PowerKit;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui;
 
@@ -22,7 +22,7 @@ public class App : Application, IDisposable
     private readonly ServiceProvider _services;
     private readonly SettingsService _settingsService;
 
-    private readonly DisposableCollector _eventRoot = new();
+    private readonly IDisposable _eventSubscription;
 
     private bool _isDisposed;
 
@@ -54,7 +54,7 @@ public class App : Application, IDisposable
         _settingsService = _services.GetRequiredService<SettingsService>();
 
         // Re-initialize the theme when the user changes it
-        _eventRoot.Add(
+        _eventSubscription = Disposable.Merge(
             _settingsService.WatchProperty(
                 o => o.Theme,
                 v =>
@@ -131,7 +131,7 @@ public class App : Application, IDisposable
 
         _isDisposed = true;
 
-        _eventRoot.Dispose();
+        _eventSubscription.Dispose();
         _services.Dispose();
     }
 }

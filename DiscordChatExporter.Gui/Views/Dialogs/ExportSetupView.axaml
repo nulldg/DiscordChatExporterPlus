@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="DiscordChatExporter.Gui.Views.Dialogs.ExportSetupView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -104,13 +104,20 @@
                     </ComboBox>
 
                     <!--  Advanced section  -->
-                    <StackPanel IsVisible="{Binding IsAdvancedSectionDisplayed}" Orientation="Vertical">
+                    <StackPanel
+                        Margin="16,8"
+                        IsVisible="{Binding IsAdvancedSectionDisplayed}"
+                        Orientation="Vertical"
+                        Spacing="16">
                         <!--  Date limits  -->
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="*,*">
+                        <Grid
+                            ColumnDefinitions="*,*"
+                            ColumnSpacing="16"
+                            RowDefinitions="*,*"
+                            RowSpacing="16">
                             <DatePicker
                                 Grid.Row="0"
                                 Grid.Column="0"
-                                Margin="16,8,8,8"
                                 materialAssists:TextFieldAssist.Label="{Binding LocalizationManager.AfterDateLabel}"
                                 SelectedDate="{Binding AfterDate}"
                                 ToolTip.Tip="{Binding LocalizationManager.AfterDateTooltip}">
@@ -125,7 +132,6 @@
                             <DatePicker
                                 Grid.Row="0"
                                 Grid.Column="1"
-                                Margin="8,8,16,8"
                                 materialAssists:TextFieldAssist.Label="{Binding LocalizationManager.BeforeDateLabel}"
                                 SelectedDate="{Binding BeforeDate}"
                                 ToolTip.Tip="{Binding LocalizationManager.BeforeDateTooltip}">
@@ -142,7 +148,6 @@
                             <TimePicker
                                 Grid.Row="1"
                                 Grid.Column="0"
-                                Margin="16,8,8,8"
                                 materialAssists:TextFieldAssist.Label="{Binding LocalizationManager.AfterTimeLabel}"
                                 ClockIdentifier="{x:Static utils:Internationalization.AvaloniaClockIdentifier}"
                                 IsEnabled="{Binding IsAfterDateSet}"
@@ -159,7 +164,6 @@
                             <TimePicker
                                 Grid.Row="1"
                                 Grid.Column="1"
-                                Margin="8,8,16,8"
                                 materialAssists:TextFieldAssist.Label="{Binding LocalizationManager.BeforeTimeLabel}"
                                 ClockIdentifier="{x:Static utils:Internationalization.AvaloniaClockIdentifier}"
                                 IsEnabled="{Binding IsBeforeDateSet}"
@@ -177,7 +181,6 @@
 
                         <!--  Partitioning  -->
                         <TextBox
-                            Margin="16,8"
                             materialAssists:TextFieldAssist.Label="{Binding LocalizationManager.PartitionLimitLabel}"
                             Text="{Binding PartitionLimitValue}"
                             Theme="{DynamicResource FilledTextBox}"
@@ -185,42 +188,31 @@
 
                         <!--  Filtering  -->
                         <TextBox
-                            Margin="16,8"
                             materialAssists:TextFieldAssist.Label="{Binding LocalizationManager.MessageFilterLabel}"
                             Text="{Binding MessageFilterValue}"
                             Theme="{DynamicResource FilledTextBox}"
                             ToolTip.Tip="{Binding LocalizationManager.MessageFilterTooltip}" />
 
                         <!--  Reverse message order  -->
-                        <DockPanel
-                            Margin="16,8"
-                            LastChildFill="False"
-                            ToolTip.Tip="{Binding LocalizationManager.ReverseMessageOrderTooltip}">
+                        <DockPanel LastChildFill="False" ToolTip.Tip="{Binding LocalizationManager.ReverseMessageOrderTooltip}">
                             <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.ReverseMessageOrderLabel}" />
                             <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsReverseMessageOrder}" />
                         </DockPanel>
 
                         <!--  Markdown formatting  -->
-                        <DockPanel
-                            Margin="16,8"
-                            LastChildFill="False"
-                            ToolTip.Tip="{Binding LocalizationManager.FormatMarkdownTooltip}">
+                        <DockPanel LastChildFill="False" ToolTip.Tip="{Binding LocalizationManager.FormatMarkdownTooltip}">
                             <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.FormatMarkdownLabel}" />
                             <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldFormatMarkdown}" />
                         </DockPanel>
 
                         <!--  Download assets  -->
-                        <DockPanel
-                            Margin="16,8"
-                            LastChildFill="False"
-                            ToolTip.Tip="{Binding LocalizationManager.DownloadAssetsTooltip}">
+                        <DockPanel LastChildFill="False" ToolTip.Tip="{Binding LocalizationManager.DownloadAssetsTooltip}">
                             <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.DownloadAssetsLabel}" />
                             <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadAssets}" />
                         </DockPanel>
 
                         <!--  Reuse assets  -->
                         <DockPanel
-                            Margin="16,8"
                             IsEnabled="{Binding ShouldDownloadAssets}"
                             LastChildFill="False"
                             ToolTip.Tip="{Binding LocalizationManager.ReuseAssetsTooltip}">
@@ -230,7 +222,6 @@
 
                         <!--  Assets path  -->
                         <TextBox
-                            Margin="16,8"
                             materialAssists:TextFieldAssist.Label="{Binding LocalizationManager.AssetsDirPathLabel}"
                             IsEnabled="{Binding ShouldDownloadAssets}"
                             Text="{Binding AssetsDirPath}"
@@ -259,7 +250,8 @@
         <Grid
             Grid.Row="2"
             Margin="16"
-            ColumnDefinitions="Auto,*,Auto,Auto">
+            ColumnDefinitions="Auto,*,Auto,Auto"
+            ColumnSpacing="8">
             <ToggleButton
                 Grid.Column="0"
                 IsChecked="{Binding IsAdvancedSectionDisplayed}"
@@ -284,7 +276,6 @@
                 Theme="{DynamicResource MaterialOutlineButton}" />
             <Button
                 Grid.Column="3"
-                Margin="16,0,0,0"
                 Command="{Binding CloseCommand}"
                 Content="{Binding LocalizationManager.CancelButton}"
                 IsCancel="True"

@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using DiscordChatExporter.Gui.ViewModels;
 using DiscordChatExporter.Gui.ViewModels.Components;

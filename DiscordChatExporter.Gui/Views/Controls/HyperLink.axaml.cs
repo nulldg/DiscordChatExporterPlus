@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using DiscordChatExporter.Gui.Utils.Extensions;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui.Views.Controls;
 

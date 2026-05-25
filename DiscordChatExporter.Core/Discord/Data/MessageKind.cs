@@ -1,4 +1,4 @@
-﻿namespace DiscordChatExporter.Core.Discord.Data;
+namespace DiscordChatExporter.Core.Discord.Data;
 
 // https://discord.com/developers/docs/resources/channel#message-object-message-types
 public enum MessageKind

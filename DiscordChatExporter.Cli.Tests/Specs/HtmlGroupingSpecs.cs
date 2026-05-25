@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
@@ -8,6 +8,7 @@ using DiscordChatExporter.Cli.Tests.Infra;
 using DiscordChatExporter.Cli.Tests.Utils;
 using DiscordChatExporter.Core.Exporting;
 using FluentAssertions;
+using PowerKit;
 using Xunit;
 
 namespace DiscordChatExporter.Cli.Tests.Specs;

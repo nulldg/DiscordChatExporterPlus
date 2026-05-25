@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CliFx.Activation;
 using DiscordChatExporter.Cli.Commands.Shared;
 

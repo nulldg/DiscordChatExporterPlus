@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Core.Exceptions;
 using DiscordChatExporter.Core.Utils;
-using DiscordChatExporter.Core.Utils.Extensions;
 using Gress;
 using JsonExtensions.Http;
 using JsonExtensions.Reading;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Core.Discord;
 
@@ -124,12 +124,12 @@ public class DiscordClient(
                 {
                     var remainingRequestCount = response
                         .Headers.TryGetValue("X-RateLimit-Remaining")
-                        ?.Pipe(s => int.Parse(s, CultureInfo.InvariantCulture));
+                        ?.Pipe(s => int.ParseOrNull(s, CultureInfo.InvariantCulture));
 
                     var resetAfterDelay = response
                         .Headers.TryGetValue("X-RateLimit-Reset-After")
-                        ?.Pipe(s => double.Parse(s, CultureInfo.InvariantCulture))
-                        .Pipe(TimeSpan.FromSeconds);
+                        ?.Pipe(s => double.ParseOrNull(s, CultureInfo.InvariantCulture))
+                        ?.Pipe(TimeSpan.FromSeconds);
 
                     // If this was the last request available before hitting the rate limit,
                     // wait out the reset time so that future requests can succeed.
@@ -226,7 +226,7 @@ public class DiscordClient(
                     $"""
                     Request to '{url}' failed: {response
                         .StatusCode.ToString()
-                        .ToSpaceSeparatedWords()
+                        .SeparateWords(' ')
                         .ToLowerInvariant()}.
                     Response content: {await response.Content.ReadAsStringAsync(
                         cancellationToken

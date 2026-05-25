@@ -1,4 +1,4 @@
-﻿namespace DiscordChatExporter.Cli.Commands.Shared;
+namespace DiscordChatExporter.Cli.Commands.Shared;
 
 public enum ThreadInclusionMode
 {

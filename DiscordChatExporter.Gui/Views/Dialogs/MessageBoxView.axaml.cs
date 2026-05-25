@@ -1,4 +1,4 @@
-﻿using DiscordChatExporter.Gui.Framework;
+using DiscordChatExporter.Gui.Framework;
 using DiscordChatExporter.Gui.ViewModels.Dialogs;
 
 namespace DiscordChatExporter.Gui.Views.Dialogs;

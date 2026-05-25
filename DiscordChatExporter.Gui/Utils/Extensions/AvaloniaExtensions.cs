@@ -1,6 +1,6 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.VisualTree;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui.Utils.Extensions;
 
@@ -8,14 +8,18 @@ internal static class AvaloniaExtensions
 {
     extension(IApplicationLifetime lifetime)
     {
-        public Window? TryGetMainWindow() =>
-            lifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime
-                ? desktopLifetime.MainWindow
-                : null;
+        public Control? TryGetMainView() =>
+            lifetime switch
+            {
+                IClassicDesktopStyleApplicationLifetime desktopLifetime =>
+                    desktopLifetime.MainWindow,
 
-        public TopLevel? TryGetTopLevel() =>
-            lifetime.TryGetMainWindow()
-            ?? (lifetime as ISingleViewApplicationLifetime)?.MainView?.GetVisualRoot() as TopLevel;
+                ISingleViewApplicationLifetime singleViewLifetime => singleViewLifetime.MainView,
+
+                _ => null,
+            };
+
+        public TopLevel? TryGetTopLevel() => lifetime.TryGetMainView()?.Pipe(TopLevel.GetTopLevel);
 
         public bool TryShutdown(int exitCode = 0)
         {
