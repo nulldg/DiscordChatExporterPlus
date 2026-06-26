@@ -37,7 +37,7 @@
     <PackageReference Include="Material.Icons.Avalonia" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Onova" />
-    <PackageReference Include="PowerKit" PrivateAssets="all" />
+    <PackageReference Include="PowerKit" />
     <PackageReference Include="ThisAssembly.Project" PrivateAssets="all" />
   </ItemGroup>
 

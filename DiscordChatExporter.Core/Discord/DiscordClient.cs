@@ -52,9 +52,8 @@ public class DiscordClient(
         string url,
         TokenKind tokenKind,
         CancellationToken cancellationToken = default
-    )
-    {
-        return await Http.ResponseResiliencePipeline.ExecuteAsync(
+    ) =>
+        await Http.ResponseResiliencePipeline.ExecuteAsync(
             async innerCancellationToken =>
             {
                 var requestUri = new Uri(_baseUri, url);
@@ -195,7 +194,6 @@ public class DiscordClient(
             },
             cancellationToken
         );
-    }
 
     private async ValueTask<TokenKind> ResolveTokenKindAsync(
         CancellationToken cancellationToken = default
@@ -468,6 +466,7 @@ public class DiscordClient(
             $"guilds/{guildId}/members/{memberId}",
             cancellationToken
         );
+
         return response?.Pipe(j => Member.Parse(j, guildId));
     }
 
@@ -516,14 +515,12 @@ public class DiscordClient(
             ?.GetNonWhiteSpaceStringOrNull()
             ?.Pipe(Snowflake.Parse);
 
-        Channel? parent = null;
-        if (parentId is not null)
-        {
-            // It's possible for the parent channel to be inaccessible, despite the
-            // child channel being accessible.
-            // https://github.com/Tyrrrz/DiscordChatExporter/issues/1108
-            parent = await TryGetChannelAsync(parentId.Value, cancellationToken);
-        }
+        // It's possible for the parent channel to be inaccessible, despite the
+        // child channel being accessible.
+        // https://github.com/Tyrrrz/DiscordChatExporter/issues/1108
+        var parent = parentId is not null
+            ? await TryGetChannelAsync(parentId.Value, cancellationToken)
+            : null;
 
         return Channel.Parse(response.Value, parent);
     }
@@ -711,8 +708,12 @@ public class DiscordClient(
             .SetQueryParameter("after", (after ?? Snowflake.Zero).ToString())
             .Build();
 
-        var response = await GetJsonResponseAsync(url, cancellationToken);
-        var message = response.EnumerateArray().Select(Message.Parse).FirstOrDefault();
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        var message = response.Value.EnumerateArray().Select(Message.Parse).FirstOrDefault();
 
         return message;
     }
@@ -729,8 +730,39 @@ public class DiscordClient(
             .SetQueryParameter("before", before?.ToString())
             .Build();
 
-        var response = await GetJsonResponseAsync(url, cancellationToken);
-        return response.EnumerateArray().Select(Message.Parse).LastOrDefault();
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        return response.Value.EnumerateArray().Select(Message.Parse).LastOrDefault();
+    }
+
+    public async ValueTask<Message?> TryGetMessageAsync(
+        Snowflake channelId,
+        Snowflake messageId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // Use the regular message listing endpoint with the 'around' parameter instead of the
+        // dedicated single-message endpoint, because the latter is not accessible to user tokens.
+        var url = new UrlBuilder()
+            .SetPath($"channels/{channelId}/messages")
+            .SetQueryParameter("around", messageId.ToString())
+            .SetQueryParameter("limit", "1")
+            .Build();
+
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        // The endpoint returns messages around the requested ID, so make sure to only return
+        // the message that exactly matches it (it may be absent if it has been deleted).
+        return response
+            .Value.EnumerateArray()
+            .Select(Message.Parse)
+            .FirstOrDefault(m => m.Id == messageId);
     }
 
     public async IAsyncEnumerable<Message> GetMessagesAsync(
@@ -805,7 +837,21 @@ public class DiscordClient(
                     );
                 }
 
-                yield return message;
+                // Some messages, for example thread starter messages, are returned by the API as content-less references.
+                // Try to resolve them to the actual message so that they appear as they do in the Discord client.
+                var actualMessage =
+                    message.Kind == MessageKind.ThreadStarterMessage
+                    && message.Reference?.ChannelId is { } referencedChannelId
+                    && message.Reference?.MessageId is { } referencedMessageId
+                        ? await TryGetMessageAsync(
+                            referencedChannelId,
+                            referencedMessageId,
+                            cancellationToken
+                        )
+                        : null;
+
+                yield return actualMessage ?? message;
+
                 currentAfter = message.Id;
             }
         }
@@ -873,7 +919,20 @@ public class DiscordClient(
                     );
                 }
 
-                yield return message;
+                // Some messages, for example thread starter messages, are returned by the API as content-less references.
+                // Try to resolve them to the actual message so that they appear as they do in the Discord client.
+                var actualMessage =
+                    message.Kind == MessageKind.ThreadStarterMessage
+                    && message.Reference?.ChannelId is { } referencedChannelId
+                    && message.Reference?.MessageId is { } referencedMessageId
+                        ? await TryGetMessageAsync(
+                            referencedChannelId,
+                            referencedMessageId,
+                            cancellationToken
+                        )
+                        : null;
+
+                yield return actualMessage ?? message;
             }
 
             currentBefore = messages.Last().Id;
