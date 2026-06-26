@@ -30,9 +30,8 @@ public class DiscordClient(
         string url,
         TokenKind tokenKind,
         CancellationToken cancellationToken = default
-    )
-    {
-        return await Http.ResponseResiliencePipeline.ExecuteAsync(
+    ) =>
+        await Http.ResponseResiliencePipeline.ExecuteAsync(
             async innerCancellationToken =>
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(_baseUri, url));
@@ -91,7 +90,6 @@ public class DiscordClient(
             },
             cancellationToken
         );
-    }
 
     private async ValueTask<TokenKind> ResolveTokenKindAsync(
         CancellationToken cancellationToken = default
@@ -364,6 +362,7 @@ public class DiscordClient(
             $"guilds/{guildId}/members/{memberId}",
             cancellationToken
         );
+
         return response?.Pipe(j => Member.Parse(j, guildId));
     }
 
@@ -412,14 +411,12 @@ public class DiscordClient(
             ?.GetNonWhiteSpaceStringOrNull()
             ?.Pipe(Snowflake.Parse);
 
-        Channel? parent = null;
-        if (parentId is not null)
-        {
-            // It's possible for the parent channel to be inaccessible, despite the
-            // child channel being accessible.
-            // https://github.com/Tyrrrz/DiscordChatExporter/issues/1108
-            parent = await TryGetChannelAsync(parentId.Value, cancellationToken);
-        }
+        // It's possible for the parent channel to be inaccessible, despite the
+        // child channel being accessible.
+        // https://github.com/Tyrrrz/DiscordChatExporter/issues/1108
+        var parent = parentId is not null
+            ? await TryGetChannelAsync(parentId.Value, cancellationToken)
+            : null;
 
         return Channel.Parse(response.Value, parent);
     }
@@ -607,8 +604,12 @@ public class DiscordClient(
             .SetQueryParameter("after", (after ?? Snowflake.Zero).ToString())
             .Build();
 
-        var response = await GetJsonResponseAsync(url, cancellationToken);
-        var message = response.EnumerateArray().Select(Message.Parse).FirstOrDefault();
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        var message = response.Value.EnumerateArray().Select(Message.Parse).FirstOrDefault();
 
         return message;
     }
@@ -625,8 +626,12 @@ public class DiscordClient(
             .SetQueryParameter("before", before?.ToString())
             .Build();
 
-        var response = await GetJsonResponseAsync(url, cancellationToken);
-        return response.EnumerateArray().Select(Message.Parse).LastOrDefault();
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        return response.Value.EnumerateArray().Select(Message.Parse).LastOrDefault();
     }
 
     public async ValueTask<Message?> TryGetMessageAsync(
@@ -654,33 +659,6 @@ public class DiscordClient(
             .Value.EnumerateArray()
             .Select(Message.Parse)
             .FirstOrDefault(m => m.Id == messageId);
-    }
-
-    private async ValueTask<Message?> ResolveThreadStarterMessageAsync(
-        Message message,
-        CancellationToken cancellationToken = default
-    )
-    {
-        // Threads created from a message contain an empty THREAD_STARTER_MESSAGE placeholder at
-        // the top of their history (in place of the actual starter message) that merely points
-        // back to the originating message in the parent channel. Resolve the placeholder to that
-        // actual message so the thread's starter message appears in the output, in its correct
-        // chronological position, with its real content.
-        // This doesn't apply to forum/media posts, whose starter message is already a regular
-        // message in the thread's own history (i.e. not a placeholder).
-        // https://github.com/Tyrrrz/DiscordChatExporter/issues/1265
-        if (message.Kind != MessageKind.ThreadStarterMessage)
-            return message;
-
-        // The placeholder references the parent channel and the original message it points to.
-        if (message.Reference?.ChannelId is not { } channelId)
-            return null;
-        if (message.Reference?.MessageId is not { } messageId)
-            return null;
-
-        // The original message may no longer be accessible (e.g. deleted), in which case the
-        // empty placeholder is dropped as well.
-        return await TryGetMessageAsync(channelId, messageId, cancellationToken);
     }
 
     public async IAsyncEnumerable<Message> GetMessagesAsync(
@@ -755,14 +733,20 @@ public class DiscordClient(
                     );
                 }
 
-                // Thread starter messages are returned as empty placeholders; resolve them to
-                // the actual message they reference before yielding (or skip if unavailable).
-                var resolvedMessage = await ResolveThreadStarterMessageAsync(
-                    message,
-                    cancellationToken
-                );
-                if (resolvedMessage is not null)
-                    yield return resolvedMessage;
+                // Some messages, for example thread starter messages, are returned by the API as content-less references.
+                // Try to resolve them to the actual message so that they appear as they do in the Discord client.
+                var actualMessage =
+                    message.Kind == MessageKind.ThreadStarterMessage
+                    && message.Reference?.ChannelId is { } referencedChannelId
+                    && message.Reference?.MessageId is { } referencedMessageId
+                        ? await TryGetMessageAsync(
+                            referencedChannelId,
+                            referencedMessageId,
+                            cancellationToken
+                        )
+                        : null;
+
+                yield return actualMessage ?? message;
 
                 currentAfter = message.Id;
             }
@@ -831,14 +815,20 @@ public class DiscordClient(
                     );
                 }
 
-                // Thread starter messages are returned as empty placeholders; resolve them to
-                // the actual message they reference before yielding (or skip if unavailable).
-                var resolvedMessage = await ResolveThreadStarterMessageAsync(
-                    message,
-                    cancellationToken
-                );
-                if (resolvedMessage is not null)
-                    yield return resolvedMessage;
+                // Some messages, for example thread starter messages, are returned by the API as content-less references.
+                // Try to resolve them to the actual message so that they appear as they do in the Discord client.
+                var actualMessage =
+                    message.Kind == MessageKind.ThreadStarterMessage
+                    && message.Reference?.ChannelId is { } referencedChannelId
+                    && message.Reference?.MessageId is { } referencedMessageId
+                        ? await TryGetMessageAsync(
+                            referencedChannelId,
+                            referencedMessageId,
+                            cancellationToken
+                        )
+                        : null;
+
+                yield return actualMessage ?? message;
             }
 
             currentBefore = messages.Last().Id;
