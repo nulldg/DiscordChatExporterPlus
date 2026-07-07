@@ -52,7 +52,6 @@ public partial class LocalizationManager : ObservableObject, IDisposable
             Language.French => FrenchLocalization,
             Language.Spanish => SpanishLocalization,
             Language.Russian => RussianLocalization,
-            
             _ => EnglishLocalization,
         };
 
