@@ -1,12 +1,15 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using DiscordChatExporter.Core.Utils.Extensions;
 using JsonExtensions.Reading;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Core.Discord.Data;
 
 // https://discord.com/developers/docs/resources/invite#invite-object
-public record Invite(string Code, Guild Guild, Channel? Channel)
+public record Invite(
+    string Code,
+    Guild Guild,
+    Channel? Channel)
 {
     public static string? TryGetCodeFromUrl(string url) =>
         Regex.Match(url, @"^https?://discord\.gg/(\w+)/?$").Groups[1].Value.NullIfWhiteSpace();

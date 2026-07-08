@@ -1,4 +1,4 @@
-﻿using DiscordChatExporter.Core.Utils.Extensions;
+using DiscordChatExporter.Core.Utils.Extensions;
 using Superpower;
 using Superpower.Parsers;
 

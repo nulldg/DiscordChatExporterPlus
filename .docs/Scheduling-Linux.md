@@ -1,8 +1,10 @@
 # Scheduling exports with Cron
 
+Make sure you already have **DiscordChatExporterPlus.CLI** downloaded and **.NET Runtime** installed.
+
 ## Creating the script
 
-1. Open Terminal and create a new text file with `nano /path/to/DiscordChatExporter/cron.sh`
+1. Open Terminal and create a new text file with `nano /path/to/DiscordChatExporterPlus/cron.sh`
 
 > **Note**:
 > You can't use your mouse in nano, use the arrow keys to control the cursor (caret).
@@ -11,7 +13,7 @@
 
 ```bash
 #!/bin/bash
-# Info: https://github.com/Tyrrrz/DiscordChatExporter/blob/master/.docs
+# Info: https://github.com/nulldg/DiscordChatExporterPlus/blob/master/.docs
 
 TOKEN=tokenhere
 CHANNELID=channelhere
@@ -43,7 +45,7 @@ fi
 cd $DLLFOLDER || exit 1
 
 # This will export your chat
-./DiscordChatExporter.Cli export -t $TOKEN -c $CHANNELID -f $EXPORTFORMAT -o $FILENAME.tmp
+./DiscordChatExporterPlus.Cli export -t $TOKEN -c $CHANNELID -f $EXPORTFORMAT -o $FILENAME.tmp
 
 # This sets the current time to a variable
 CURRENTTIME=$(date +"%Y-%m-%d-%H-%M-%S")
@@ -64,7 +66,7 @@ exit 0
 
 - `tokenhere` with your [Token](Token-and-IDs.md).
 - `channelhere` with a [Channel ID](Token-and-IDs.md).
-- `dceFOLDERpathhere` with DCE's **directory path** (e.g. `/path/to/folder`, NOT `/path/to/folder/DiscordChatExporter.dll`).
+- `dceFOLDERpathhere` with DCEp's **directory path** (e.g. `/path/to/folder`, NOT `/path/to/folder/DiscordChatExporter.dll`).
 - `filenamehere` with the exported channel's filename, without spaces.
 - `dirhere` with the export directory (e.g. /home/user/Documents/Discord\ Exports).
 - `formathere` with one of the available export formats.
@@ -76,7 +78,7 @@ exit 0
 > To save, hold down CTRL and then press O, if asked for a filename, type it and press ENTER. Hit CTRL+X to exit the text editor.
 > [Check out this page](https://wiki.gentoo.org/wiki/Nano/Basics_Guide) if you want to know more about nano.
 
-4. Make your script executable with `chmod +x /path/to/DiscordChatExporter/cron.sh`
+4. Make your script executable with `chmod +x /path/to/DiscordChatExporterPlus/cron.sh`
 
 5. Let's edit the cron file. If you want to run the script with your user privileges, edit it by running `crontab -e`. If you want to run the script as root, edit it with `sudo crontab -e`. If this is your first time running this command, you might be asked to select a text editor. Nano is easier for beginners.
 

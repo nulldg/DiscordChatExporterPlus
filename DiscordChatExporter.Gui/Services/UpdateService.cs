@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Onova;
@@ -9,24 +9,25 @@ namespace DiscordChatExporter.Gui.Services;
 
 public class UpdateService(SettingsService settingsService) : IDisposable
 {
-    private readonly IUpdateManager? _updateManager = OperatingSystem.IsWindows()
-        ? new UpdateManager(
-            new GithubPackageResolver(
-                "Tyrrrz",
-                "DiscordChatExporter",
-                // Examples:
-                // DiscordChatExporter.win-arm64.zip
-                // DiscordChatExporter.win-x64.zip
-                // DiscordChatExporter.linux-x64.zip
-                $"DiscordChatExporter.{RuntimeInformation.RuntimeIdentifier}.zip"
-            ),
-            new ZipPackageExtractor()
-        )
-        : null;
+    private readonly IUpdateManager? _updateManager =
+        OperatingSystem.IsWindows() && StartOptions.Current.IsAutoUpdateAllowed
+            ? new UpdateManager(
+                new GithubPackageResolver(
+                    "nulldg",
+                    "DiscordChatExporterPlus",
+                    // Examples:
+                    // DiscordChatExporterPlus.win-arm64.zip
+                    // DiscordChatExporterPlus.win-x64.zip
+                    // DiscordChatExporterPlus.linux-x64.zip
+                    $"DiscordChatExporterPlus.{RuntimeInformation.RuntimeIdentifier}.zip"
+                ),
+                new ZipPackageExtractor()
+            )
+            : null;
 
     private Version? _updateVersion;
-    private bool _updatePrepared;
-    private bool _updaterLaunched;
+    private bool _isUpdatePrepared;
+    private bool _isUpdaterLaunched;
 
     public async ValueTask<Version?> CheckForUpdatesAsync()
     {
@@ -51,7 +52,7 @@ public class UpdateService(SettingsService settingsService) : IDisposable
         try
         {
             await _updateManager.PrepareUpdateAsync(_updateVersion = version);
-            _updatePrepared = true;
+            _isUpdatePrepared = true;
         }
         catch (UpdaterAlreadyLaunchedException)
         {
@@ -71,13 +72,13 @@ public class UpdateService(SettingsService settingsService) : IDisposable
         if (!settingsService.IsAutoUpdateEnabled)
             return;
 
-        if (_updateVersion is null || !_updatePrepared || _updaterLaunched)
+        if (_updateVersion is null || !_isUpdatePrepared || _isUpdaterLaunched)
             return;
 
         try
         {
             _updateManager.LaunchUpdater(_updateVersion, needRestart);
-            _updaterLaunched = true;
+            _isUpdaterLaunched = true;
         }
         catch (UpdaterAlreadyLaunchedException)
         {

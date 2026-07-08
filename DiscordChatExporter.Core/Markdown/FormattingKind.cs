@@ -1,4 +1,4 @@
-﻿namespace DiscordChatExporter.Core.Markdown;
+namespace DiscordChatExporter.Core.Markdown;
 
 internal enum FormattingKind
 {

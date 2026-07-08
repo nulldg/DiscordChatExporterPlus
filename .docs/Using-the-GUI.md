@@ -10,10 +10,10 @@
 
 ### Step 1
 
-After extracting the `.zip`, run `DiscordChatExporter.exe` **(Windows)**, or `DiscordChatExporter` **(Linux)**.
+After extracting the `.zip`, run `DiscordChatExporterPlus.exe` **(Windows)**, or `DiscordChatExporterPlus` **(Linux)**.
 
 If you're using **macOS**, you'll need to manually grant permission for the app to run.  
-If you skip these steps, the "DiscordChatExporter is damaged and can’t be opened" error will be shown.
+If you skip these steps, the "DiscordChatExporterPlus is damaged and can’t be opened" error will be shown.
 
 1. Open Terminal.app. You can search for it in Spotlight (press <kbd>⌘</kbd> + <kbd>Space</kbd> and type "Terminal").
 2. Paste the following into the terminal window:
@@ -21,9 +21,9 @@ If you skip these steps, the "DiscordChatExporter is damaged and can’t be open
    xattr -rd com.apple.quarantine
    ```
 3. Hit <kbd>Space</kbd> once to add a space after the command
-4. Drag and drop DiscordChatExporter.app into the terminal window
+4. Drag and drop DiscordChatExporterPlus.app into the terminal window
 5. Press <kbd>Return</kbd> to run the command
-6. Open DiscordChatExporter.app normally
+6. Open DiscordChatExporterPlus.app normally
 
 > Apple requires apps to be notarized and signed in order to run on macOS without warnings, which in turn requires an Apple Developer membership ($99/year). This open-source project is distributed for free and without commercial intent.
 

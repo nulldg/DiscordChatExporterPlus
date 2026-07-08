@@ -1,10 +1,10 @@
-﻿using System;
-using CliFx.Extensibility;
+using System;
+using CliFx.Activation;
 using DiscordChatExporter.Cli.Commands.Shared;
 
 namespace DiscordChatExporter.Cli.Commands.Converters;
 
-internal class ThreadInclusionModeBindingConverter : BindingConverter<ThreadInclusionMode>
+internal class ThreadInclusionModeInputConverter : ScalarInputConverter<ThreadInclusionMode>
 {
     public override ThreadInclusionMode Convert(string? rawValue)
     {

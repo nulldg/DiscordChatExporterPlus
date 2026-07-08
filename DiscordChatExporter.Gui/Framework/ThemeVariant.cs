@@ -1,4 +1,4 @@
-﻿namespace DiscordChatExporter.Gui.Framework;
+namespace DiscordChatExporter.Gui.Framework;
 
 public enum ThemeVariant
 {

@@ -11,7 +11,7 @@ public partial class LocalizationManager
             [nameof(PullGuildsTooltip)] = "Pull available servers and channels (Enter)",
             [nameof(SettingsTooltip)] = "Settings",
             [nameof(LastMessageSentTooltip)] = "Last message sent:",
-            [nameof(TokenWatermark)] = "Token",
+            [nameof(TokenPlaceholderText)] = "Token",
             // Token instructions (personal account)
             [nameof(TokenPersonalHeader)] = "To get the token for your personal account:",
             [nameof(TokenPersonalTosWarning)] =
@@ -42,7 +42,7 @@ public partial class LocalizationManager
                 *  Your bot needs to have the **Message Content Intent** enabled to read messages
                 """,
             [nameof(TokenHelpText)] =
-                "If you have questions or issues, please refer to the [documentation](https://github.com/Tyrrrz/DiscordChatExporter/tree/master/.docs)",
+                "If you have questions or issues, please refer to the [documentation](https://github.com/nulldg/DiscordChatExporterPlus/tree/master/.docs)",
             // Settings
             [nameof(SettingsTitle)] = "Settings",
             [nameof(ThemeLabel)] = "Theme",
@@ -127,13 +127,6 @@ public partial class LocalizationManager
             [nameof(CloseButton)] = "CLOSE",
             [nameof(CancelButton)] = "CANCEL",
             // Dialog messages
-            [nameof(UkraineSupportTitle)] = "Thank you for supporting Ukraine!",
-            [nameof(UkraineSupportMessage)] = """
-                As Russia wages a genocidal war against my country, I'm grateful to everyone who continues to stand with Ukraine in our fight for freedom.
-
-                Click LEARN MORE to find ways that you can help.
-                """,
-            [nameof(LearnMoreButton)] = "LEARN MORE",
             [nameof(UnstableBuildTitle)] = "Unstable build warning",
             [nameof(UnstableBuildMessage)] = """
                 You're using a development build of {0}. These builds are not thoroughly tested and may contain bugs.

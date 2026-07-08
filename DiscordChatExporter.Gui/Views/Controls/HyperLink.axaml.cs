@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using DiscordChatExporter.Gui.Utils.Extensions;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui.Views.Controls;
 
@@ -54,8 +54,7 @@ public partial class HyperLink : UserControl
     {
         if (Command is not null)
         {
-            if (Command.CanExecute(CommandParameter))
-                Command.Execute(CommandParameter);
+            Command.ExecuteIfCan(CommandParameter);
         }
         else if (!string.IsNullOrWhiteSpace(Url))
         {

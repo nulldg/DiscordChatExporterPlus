@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DiscordChatExporter.Core.Discord.Data;
+using DiscordChatExporter.Gui.Localization;
 using DiscordChatExporter.Gui.ViewModels;
 using DiscordChatExporter.Gui.ViewModels.Components;
 using DiscordChatExporter.Gui.ViewModels.Dialogs;
@@ -8,14 +9,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DiscordChatExporter.Gui.Framework;
 
-public class ViewModelManager(IServiceProvider services)
+public class ViewModelManager(IServiceProvider services, LocalizationManager localizationManager)
 {
-    public MainViewModel CreateMainViewModel() => services.GetRequiredService<MainViewModel>();
+    public MainViewModel GetMainViewModel() => services.GetRequiredService<MainViewModel>();
 
-    public DashboardViewModel CreateDashboardViewModel() =>
+    public DashboardViewModel GetDashboardViewModel() =>
         services.GetRequiredService<DashboardViewModel>();
 
-    public ExportSetupViewModel CreateExportSetupViewModel(
+    public ExportSetupViewModel GetExportSetupViewModel(
         Guild guild,
         IReadOnlyList<Channel> channels
     )
@@ -28,7 +29,7 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public MessageBoxViewModel CreateMessageBoxViewModel(
+    public MessageBoxViewModel GetMessageBoxViewModel(
         string title,
         string message,
         string? okButtonText,
@@ -45,9 +46,9 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public MessageBoxViewModel CreateMessageBoxViewModel(string title, string message) =>
-        CreateMessageBoxViewModel(title, message, "CLOSE", null);
+    public MessageBoxViewModel GetMessageBoxViewModel(string title, string message) =>
+        GetMessageBoxViewModel(title, message, localizationManager.CloseButton, null);
 
-    public SettingsViewModel CreateSettingsViewModel() =>
+    public SettingsViewModel GetSettingsViewModel() =>
         services.GetRequiredService<SettingsViewModel>();
 }

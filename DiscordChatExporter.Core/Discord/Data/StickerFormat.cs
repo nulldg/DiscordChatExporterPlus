@@ -1,4 +1,4 @@
-﻿namespace DiscordChatExporter.Core.Discord.Data;
+namespace DiscordChatExporter.Core.Discord.Data;
 
 public enum StickerFormat
 {

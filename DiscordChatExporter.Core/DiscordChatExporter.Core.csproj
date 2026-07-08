@@ -1,14 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="AngleSharp" />
     <PackageReference Include="AsyncKeyedLock" />
-    <PackageReference Include="CSharpier.MsBuild" PrivateAssets="all" />
     <PackageReference Include="Gress" />
+    <PackageReference Include="HttpCloak" />
     <PackageReference Include="JsonExtensions" />
     <PackageReference Include="Polly" />
+    <PackageReference Include="PowerKit" />
     <PackageReference Include="RazorBlade" />
     <PackageReference Include="Superpower" />
     <PackageReference Include="WebMarkupMin.Core" />
-    <PackageReference Include="YoutubeExplode" />
   </ItemGroup>
 </Project>

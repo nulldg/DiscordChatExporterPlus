@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using CliFx.Attributes;
+using CliFx.Binding;
 using CliFx.Infrastructure;
 using DiscordChatExporter.Cli.Commands.Base;
 using DiscordChatExporter.Cli.Utils.Extensions;
@@ -11,13 +11,13 @@ using Spectre.Console;
 namespace DiscordChatExporter.Cli.Commands;
 
 [Command("exportguild", Description = "Exports all channels within the specified server.")]
-public class ExportGuildCommand : ExportCommandBase
+public partial class ExportGuildCommand : ExportCommandBase
 {
     [CommandOption("guild", 'g', Description = "Server ID.")]
-    public required Snowflake GuildId { get; init; }
+    public required Snowflake GuildId { get; set; }
 
     [CommandOption("include-vc", Description = "Include voice channels.")]
-    public bool IncludeVoiceChannels { get; init; } = true;
+    public bool IncludeVoiceChannels { get; set; } = true;
 
     public override async ValueTask ExecuteAsync(IConsole console)
     {

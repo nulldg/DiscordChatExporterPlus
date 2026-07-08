@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -7,7 +7,7 @@ using DiscordChatExporter.Core.Discord;
 using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Core.Exporting.Filtering;
 using DiscordChatExporter.Core.Exporting.Partitioning;
-using DiscordChatExporter.Core.Utils.Extensions;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Core.Exporting;
 
@@ -206,10 +206,15 @@ public partial class ExportRequest
     {
         var actualOutputPath = FormatPath(outputPath, guild, channel, after, before);
 
-        // Output is a directory
+        // Determine whether the output path refers to a directory or a file.
+        // The extension-based heuristic is evaluated on the original, unsubstituted path,
+        // because the value of a template token (e.g. a guild or channel name) may contain
+        // a period that would otherwise be mistaken for a file extension, incorrectly causing
+        // a directory path to be treated as a file.
+        // https://github.com/Tyrrrz/DiscordChatExporter/issues/1502
         if (
             Directory.Exists(actualOutputPath)
-            || string.IsNullOrWhiteSpace(Path.GetExtension(actualOutputPath))
+            || string.IsNullOrWhiteSpace(Path.GetExtension(outputPath))
         )
         {
             var fileName = GetDefaultOutputFileName(guild, channel, format, after, before);

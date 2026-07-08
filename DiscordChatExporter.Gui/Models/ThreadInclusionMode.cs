@@ -1,4 +1,4 @@
-﻿namespace DiscordChatExporter.Gui.Models;
+namespace DiscordChatExporter.Gui.Models;
 
 public enum ThreadInclusionMode
 {

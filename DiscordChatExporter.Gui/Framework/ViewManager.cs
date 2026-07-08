@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using DiscordChatExporter.Gui.ViewModels;
 using DiscordChatExporter.Gui.ViewModels.Components;
@@ -29,9 +29,16 @@ public partial class ViewManager
             return null;
 
         view.DataContext ??= viewModel;
+        view.Loaded += async (_, _) => await viewModel.InitializeAsync();
 
         return view;
     }
+
+    public UserControl<T>? TryBindUserControl<T>(T viewModel)
+        where T : ViewModelBase => TryBindView(viewModel) as UserControl<T>;
+
+    public Window<T>? TryBindWindow<T>(T viewModel)
+        where T : ViewModelBase => TryBindView(viewModel) as Window<T>;
 }
 
 public partial class ViewManager : IDataTemplate

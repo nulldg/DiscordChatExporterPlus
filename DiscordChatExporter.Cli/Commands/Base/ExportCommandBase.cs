@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CliFx.Attributes;
-using CliFx.Exceptions;
+using CliFx;
+using CliFx.Binding;
 using CliFx.Infrastructure;
 using DiscordChatExporter.Cli.Commands.Converters;
 using DiscordChatExporter.Cli.Commands.Shared;
@@ -37,114 +37,107 @@ public abstract class ExportCommandBase : DiscordCommandBase
         get;
         // Handle ~/ in paths on Unix systems
         // https://github.com/Tyrrrz/DiscordChatExporter/pull/903
-        init => field = Path.GetFullPath(value);
+        set => field = Path.GetFullPath(value);
     } = Directory.GetCurrentDirectory();
 
     [CommandOption("format", 'f', Description = "Export format.")]
-    public ExportFormat ExportFormat { get; init; } = ExportFormat.HtmlDark;
+    public ExportFormat ExportFormat { get; set; } = ExportFormat.HtmlDark;
 
     [CommandOption(
         "after",
         Description = "Only include messages sent after this date or message ID."
     )]
-    public Snowflake? After { get; init; }
+    public Snowflake? After { get; set; }
 
     [CommandOption(
         "before",
         Description = "Only include messages sent before this date or message ID."
     )]
-    public Snowflake? Before { get; init; }
+    public Snowflake? Before { get; set; }
 
     [CommandOption(
         "partition",
         'p',
-        Description = "Split the output into partitions, each limited to the specified "
-            + "number of messages (e.g. '100') or file size (e.g. '10mb')."
+        Description =
+            "Split the output into partitions, each limited to the specified " +
+            "number of messages (e.g. '100') or file size (e.g. '10mb')."
     )]
-    public PartitionLimit PartitionLimit { get; init; } = PartitionLimit.Null;
+    public PartitionLimit PartitionLimit { get; set; } = PartitionLimit.Null;
 
     [CommandOption(
         "include-threads",
         Description = "Which types of threads should be included.",
-        Converter = typeof(ThreadInclusionModeBindingConverter)
+        Converter = typeof(ThreadInclusionModeInputConverter)
     )]
-    public ThreadInclusionMode ThreadInclusionMode { get; init; } = ThreadInclusionMode.None;
+    public ThreadInclusionMode ThreadInclusionMode { get; set; } = ThreadInclusionMode.None;
 
     [CommandOption(
         "filter",
-        Description = "Only include messages that satisfy this filter. "
-            + "See the documentation for more info."
+        Description =
+            "Only include messages that satisfy this filter. " +
+            "See the documentation for more info."
     )]
-    public MessageFilter MessageFilter { get; init; } = MessageFilter.Null;
+    public MessageFilter MessageFilter { get; set; } = MessageFilter.Null;
 
     [CommandOption(
         "parallel",
         Description = "Limits how many channels can be exported in parallel."
     )]
-    public int ParallelLimit { get; init; } = 1;
+    public int ParallelLimit { get; set; } = 1;
 
     [CommandOption(
         "reverse",
         Description = "Export messages in reverse chronological order (newest first)."
     )]
-    public bool IsReverseMessageOrder { get; init; }
+    public bool IsReverseMessageOrder { get; set; }
 
     [CommandOption(
         "markdown",
         Description = "Process markdown, mentions, and other special tokens."
     )]
-    public bool ShouldFormatMarkdown { get; init; } = true;
+    public bool ShouldFormatMarkdown { get; set; } = true;
 
     [CommandOption(
         "media",
         Description = "Download assets referenced by the export (user avatars, attached files, embedded images, etc.)."
     )]
-    public bool ShouldDownloadAssets { get; init; }
+    public bool ShouldDownloadAssets { get; set; }
 
     [CommandOption(
         "reuse-media",
         Description = "Reuse previously downloaded assets to avoid redundant requests."
     )]
-    public bool ShouldReuseAssets { get; init; } = false;
+    public bool ShouldReuseAssets { get; set; } = false;
 
     [CommandOption(
         "media-dir",
-        Description = "Download assets to this directory. "
-            + "If not specified, the asset directory path will be derived from the output path."
+        Description =
+            "Download assets to this directory. " +
+            "If not specified, the asset directory path will be derived from the output path."
     )]
     public string? AssetsDirPath
     {
         get;
         // Handle ~/ in paths on Unix systems
         // https://github.com/Tyrrrz/DiscordChatExporter/pull/903
-        init => field = value is not null ? Path.GetFullPath(value) : null;
+        set => field = value is not null ? Path.GetFullPath(value) : null;
     }
 
-    [Obsolete("This option doesn't do anything. Kept for backwards compatibility.")]
     [CommandOption(
         "dateformat",
         Description = "This option doesn't do anything. Kept for backwards compatibility."
     )]
-    public string DateFormat { get; init; } = "MM/dd/yyyy h:mm tt";
+    public string DateFormat { get; set; } = "MM/dd/yyyy h:mm tt";
 
     [CommandOption(
         "locale",
         Description = "Locale to use when formatting dates and numbers. "
             + "If not specified, the default system locale will be used."
     )]
-    public string? Locale { get; init; }
+    public string? Locale { get; set; }
 
     [CommandOption("utc", Description = "Normalize all timestamps to UTC+0.")]
-    public bool IsUtcNormalizationEnabled { get; init; } = false;
-
-    [CommandOption(
-        "fuck-russia",
-        EnvironmentVariable = "FUCK_RUSSIA",
-        Description = "Don't print the Support Ukraine message to the console.",
-        // Use a converter to accept '1' as 'true' to reuse the existing environment variable
-        Converter = typeof(TruthyBooleanBindingConverter)
-    )]
-    public bool IsUkraineSupportMessageDisabled { get; init; } = false;
+    public bool IsUtcNormalizationEnabled { get; set; } = false;
 
     [field: AllowNull, MaybeNull]
     protected ChannelExporter Exporter => field ??= new ChannelExporter(Discord);
@@ -164,6 +157,37 @@ public abstract class ExportCommandBase : DiscordCommandBase
         if (!string.IsNullOrWhiteSpace(AssetsDirPath) && !ShouldDownloadAssets)
         {
             throw new CommandException("Option --media-dir cannot be used without --media.");
+        }
+
+        // Make sure the user does not try to export multiple channels into one file.
+        // Output path must either be a directory or contain template tokens for this to work.
+        // Validate this up-front, before fetching threads, because thread fetching can take a
+        // long time and it's frustrating to fail only after it completes.
+        // https://github.com/Tyrrrz/DiscordChatExporter/issues/799
+        // https://github.com/Tyrrrz/DiscordChatExporter/issues/917
+        // https://github.com/Tyrrrz/DiscordChatExporter/issues/1549
+        var mayExportMultipleChannels =
+            // Multiple channels were provided explicitly
+            channels.Count > 1
+            // Thread inclusion can add more channels to the export
+            || ThreadInclusionMode != ThreadInclusionMode.None;
+
+        var isValidOutputPath =
+            // Anything is valid when exporting a single channel
+            !mayExportMultipleChannels
+            // When using template tokens, assume the user knows what they're doing
+            || OutputPath.Contains('%')
+            // Otherwise, require an existing directory or an unambiguous directory path
+            || Directory.Exists(OutputPath)
+            || Path.EndsInDirectorySeparator(OutputPath);
+
+        if (!isValidOutputPath)
+        {
+            throw new CommandException(
+                "Attempted to export multiple channels, but the output path is neither a directory nor a template. "
+                    + "If the provided output path is meant to be treated as a directory, make sure it ends with a slash. "
+                    + $"Provided output path: '{OutputPath}'."
+            );
         }
 
         var unwrappedChannels = new List<Channel>(channels);
@@ -204,28 +228,6 @@ public abstract class ExportCommandBase : DiscordCommandBase
             unwrappedChannels.RemoveAll(channel => channel.Kind == ChannelKind.GuildForum);
 
             await console.Output.WriteLineAsync($"Fetched {fetchedThreadsCount} thread(s).");
-        }
-
-        // Make sure the user does not try to export multiple channels into one file.
-        // Output path must either be a directory or contain template tokens for this to work.
-        // https://github.com/Tyrrrz/DiscordChatExporter/issues/799
-        // https://github.com/Tyrrrz/DiscordChatExporter/issues/917
-        var isValidOutputPath =
-            // Anything is valid when exporting a single channel
-            unwrappedChannels.Count <= 1
-            // When using template tokens, assume the user knows what they're doing
-            || OutputPath.Contains('%')
-            // Otherwise, require an existing directory or an unambiguous directory path
-            || Directory.Exists(OutputPath)
-            || Path.EndsInDirectorySeparator(OutputPath);
-
-        if (!isValidOutputPath)
-        {
-            throw new CommandException(
-                "Attempted to export multiple channels, but the output path is neither a directory nor a template. "
-                    + "If the provided output path is meant to be treated as a directory, make sure it ends with a slash. "
-                    + $"Provided output path: '{OutputPath}'."
-            );
         }
 
         // Export
@@ -355,43 +357,5 @@ public abstract class ExportCommandBase : DiscordCommandBase
         // If only some channels failed to export, it's okay.
         if (errorsByChannel.Count >= unwrappedChannels.Count)
             throw new CommandException("Export failed.");
-    }
-
-    public override async ValueTask ExecuteAsync(IConsole console)
-    {
-        // Support Ukraine callout
-        if (!IsUkraineSupportMessageDisabled)
-        {
-            console.Output.WriteLine(
-                "┌────────────────────────────────────────────────────────────────────┐"
-            );
-            console.Output.WriteLine(
-                "│   Thank you for supporting Ukraine <3                              │"
-            );
-            console.Output.WriteLine(
-                "│                                                                    │"
-            );
-            console.Output.WriteLine(
-                "│   As Russia wages a genocidal war against my country,              │"
-            );
-            console.Output.WriteLine(
-                "│   I'm grateful to everyone who continues to                        │"
-            );
-            console.Output.WriteLine(
-                "│   stand with Ukraine in our fight for freedom.                     │"
-            );
-            console.Output.WriteLine(
-                "│                                                                    │"
-            );
-            console.Output.WriteLine(
-                "│   Learn more: https://tyrrrz.me/ukraine                            │"
-            );
-            console.Output.WriteLine(
-                "└────────────────────────────────────────────────────────────────────┘"
-            );
-            console.Output.WriteLine("");
-        }
-
-        await base.ExecuteAsync(console);
     }
 }

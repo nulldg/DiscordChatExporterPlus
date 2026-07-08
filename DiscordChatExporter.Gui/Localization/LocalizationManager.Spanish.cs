@@ -11,7 +11,7 @@ public partial class LocalizationManager
             [nameof(PullGuildsTooltip)] = "Cargar servidores y canales disponibles (Enter)",
             [nameof(SettingsTooltip)] = "Ajustes",
             [nameof(LastMessageSentTooltip)] = "Último mensaje enviado:",
-            [nameof(TokenWatermark)] = "Token",
+            [nameof(TokenPlaceholderText)] = "Token",
             // Token instructions (personal account)
             [nameof(TokenPersonalHeader)] = "Cómo obtener el token para tu cuenta personal:",
             [nameof(TokenPersonalTosWarning)] =
@@ -42,7 +42,7 @@ public partial class LocalizationManager
                 *  Tu bot necesita tener habilitado **Message Content Intent** para leer mensajes
                 """,
             [nameof(TokenHelpText)] =
-                "Si tienes preguntas o problemas, consulta la [documentación](https://github.com/Tyrrrz/DiscordChatExporter/tree/master/.docs)",
+                "Si tienes preguntas o problemas, consulta la [documentación](https://github.com/nulldg/DiscordChatExporterPlus/tree/master/.docs)",
             // Settings
             [nameof(SettingsTitle)] = "Ajustes",
             [nameof(ThemeLabel)] = "Tema",
@@ -127,13 +127,6 @@ public partial class LocalizationManager
             [nameof(CloseButton)] = "CERRAR",
             [nameof(CancelButton)] = "CANCELAR",
             // Dialog messages
-            [nameof(UkraineSupportTitle)] = "¡Gracias por apoyar a Ucrania!",
-            [nameof(UkraineSupportMessage)] = """
-                Mientras Rusia libra una guerra genocida contra mi país, estoy agradecido con todos los que continúan apoyando a Ucrania en nuestra lucha por la libertad.
-
-                Haga clic en MÁS INFORMACIÓN para encontrar formas de ayudar.
-                """,
-            [nameof(LearnMoreButton)] = "MÁS INFORMACIÓN",
             [nameof(UnstableBuildTitle)] = "Advertencia de versión inestable",
             [nameof(UnstableBuildMessage)] = """
                 Está usando una versión de desarrollo de {0}. Estas versiones no han sido probadas exhaustivamente y pueden contener errores.

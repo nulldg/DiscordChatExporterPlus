@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,10 +10,10 @@ using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Core.Exporting;
 using DiscordChatExporter.Core.Exporting.Filtering;
 using DiscordChatExporter.Core.Exporting.Partitioning;
-using DiscordChatExporter.Core.Utils.Extensions;
 using DiscordChatExporter.Gui.Framework;
 using DiscordChatExporter.Gui.Localization;
 using DiscordChatExporter.Gui.Services;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui.ViewModels.Dialogs;
 
@@ -102,8 +102,7 @@ public partial class ExportSetupViewModel(
             ? MessageFilter.Parse(MessageFilterValue)
             : MessageFilter.Null;
 
-    [RelayCommand]
-    private void Initialize()
+    public override Task InitializeAsync()
     {
         // Persist preferences
         SelectedFormat = settingsService.LastExportFormat;
@@ -126,6 +125,8 @@ public partial class ExportSetupViewModel(
             || ShouldReuseAssets
             || !string.IsNullOrWhiteSpace(AssetsDirPath)
             || IsReverseMessageOrder;
+
+        return Task.CompletedTask;
     }
 
     [RelayCommand]

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
@@ -21,7 +21,11 @@ public class HtmlAttachmentSpecs
         );
 
         // Assert
-        message.Text().Should().ContainAll("Generic file attachment", "Test.txt", "11 bytes");
+        message.Text().Should().ContainAll(
+            "Generic file attachment",
+            "Test.txt",
+            "11 bytes"
+        );
 
         message
             .QuerySelectorAll("a")

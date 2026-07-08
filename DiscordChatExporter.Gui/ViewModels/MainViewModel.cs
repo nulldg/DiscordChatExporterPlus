@@ -1,19 +1,15 @@
-﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Avalonia;
-using CommunityToolkit.Mvvm.Input;
 using DiscordChatExporter.Gui.Framework;
 using DiscordChatExporter.Gui.Localization;
 using DiscordChatExporter.Gui.Services;
-using DiscordChatExporter.Gui.Utils.Extensions;
 using DiscordChatExporter.Gui.ViewModels.Components;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Gui.ViewModels;
 
 public partial class MainViewModel(
     ViewModelManager viewModelManager,
-    DialogManager dialogManager,
     SnackbarManager snackbarManager,
     SettingsService settingsService,
     UpdateService updateService,
@@ -22,47 +18,7 @@ public partial class MainViewModel(
 {
     public string Title { get; } = $"{Program.Name} v{Program.VersionString}";
 
-    public DashboardViewModel Dashboard { get; } = viewModelManager.CreateDashboardViewModel();
-
-    private async Task ShowUkraineSupportMessageAsync()
-    {
-        if (!settingsService.IsUkraineSupportMessageEnabled)
-            return;
-
-        var dialog = viewModelManager.CreateMessageBoxViewModel(
-            localizationManager.UkraineSupportTitle,
-            localizationManager.UkraineSupportMessage,
-            localizationManager.LearnMoreButton,
-            localizationManager.CloseButton
-        );
-
-        // Disable this message in the future
-        settingsService.IsUkraineSupportMessageEnabled = false;
-        settingsService.Save();
-
-        if (await dialogManager.ShowDialogAsync(dialog) == true)
-            Process.StartShellExecute("https://tyrrrz.me/ukraine?source=discordchatexporter");
-    }
-
-    private async Task ShowDevelopmentBuildMessageAsync()
-    {
-        if (!Program.IsDevelopmentBuild)
-            return;
-
-        // If debugging, the user is likely a developer
-        if (Debugger.IsAttached)
-            return;
-
-        var dialog = viewModelManager.CreateMessageBoxViewModel(
-            localizationManager.UnstableBuildTitle,
-            string.Format(localizationManager.UnstableBuildMessage, Program.Name),
-            localizationManager.SeeReleasesButton,
-            localizationManager.CloseButton
-        );
-
-        if (await dialogManager.ShowDialogAsync(dialog) == true)
-            Process.StartShellExecute(Program.ProjectReleasesUrl);
-    }
+    public DashboardViewModel Dashboard { get; } = viewModelManager.GetDashboardViewModel();
 
     private async Task CheckForUpdatesAsync()
     {
@@ -88,8 +44,7 @@ public partial class MainViewModel(
                 {
                     updateService.FinalizeUpdate(true);
 
-                    if (Application.Current?.ApplicationLifetime?.TryShutdown(2) != true)
-                        Environment.Exit(2);
+                    App.Shutdown(2);
                 }
             );
         }
@@ -100,11 +55,8 @@ public partial class MainViewModel(
         }
     }
 
-    [RelayCommand]
-    private async Task InitializeAsync()
+    public override async Task InitializeAsync()
     {
-        await ShowUkraineSupportMessageAsync();
-        await ShowDevelopmentBuildMessageAsync();
         await CheckForUpdatesAsync();
     }
 

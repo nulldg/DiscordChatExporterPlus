@@ -1,5 +1,3 @@
-﻿using System;
-using System.IO;
 using System.Text.Json.Serialization;
 using Cogwheel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,14 +11,8 @@ namespace DiscordChatExporter.Gui.Services;
 
 [ObservableObject]
 public partial class SettingsService()
-    : SettingsBase(
-        Path.Combine(AppContext.BaseDirectory, "Settings.dat"),
-        SerializerContext.Default
-    )
+    : SettingsBase(StartOptions.Current.SettingsPath, SerializerContext.Default)
 {
-    [ObservableProperty]
-    public partial bool IsUkraineSupportMessageEnabled { get; set; } = true;
-
     [ObservableProperty]
     public partial ThemeVariant Theme { get; set; }
 

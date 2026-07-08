@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using Avalonia;
 using DiscordChatExporter.Gui.Utils;
@@ -9,15 +9,13 @@ public static class Program
 {
     private static Assembly Assembly { get; } = Assembly.GetExecutingAssembly();
 
-    public static string Name { get; } = Assembly.GetName().Name ?? "DiscordChatExporter";
+    public static string Name { get; } = Assembly.GetName().Name ?? "DiscordChatExporterPlus";
 
     public static Version Version { get; } = Assembly.GetName().Version ?? new Version(0, 0, 0);
 
     public static string VersionString { get; } = Version.ToString(3);
 
-    public static bool IsDevelopmentBuild { get; } = Version.Major is <= 0 or >= 999;
-
-    public static string ProjectUrl { get; } = "https://github.com/Tyrrrz/DiscordChatExporter";
+    public static string ProjectUrl { get; } = "https://github.com/nulldg/DiscordChatExporterPlus";
 
     public static string ProjectReleasesUrl { get; } = $"{ProjectUrl}/releases";
 

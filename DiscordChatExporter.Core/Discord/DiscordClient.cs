@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,44 +11,147 @@ using System.Threading.Tasks;
 using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Core.Exceptions;
 using DiscordChatExporter.Core.Utils;
-using DiscordChatExporter.Core.Utils.Extensions;
 using Gress;
+using HttpCloak;
 using JsonExtensions.Http;
 using JsonExtensions.Reading;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Core.Discord;
+
 
 public class DiscordClient(
     string token,
     RateLimitPreference rateLimitPreference = RateLimitPreference.RespectAll
-)
+) : IDisposable
 {
     private readonly Uri _baseUri = new("https://discord.com/api/v10/", UriKind.Absolute);
+    private readonly Session _session = new(preset: Presets.ChromeLatest, retry: 0);
     private TokenKind? _resolvedTokenKind;
+    private static Dictionary<string, string>? _cachedBrowserHeaders;
+
+    private static HttpResponseMessage ToHttpResponseMessage(Response source, Uri requestUri)
+    {
+        var response = new HttpResponseMessage((HttpStatusCode)source.StatusCode)
+        {
+            Content = new ByteArrayContent(source.Content),
+            ReasonPhrase = source.Reason,
+            RequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri),
+        };
+
+        foreach (var (name, values) in source.Headers)
+        {
+            if (!response.Headers.TryAddWithoutValidation(name, values))
+                response.Content.Headers.TryAddWithoutValidation(name, values);
+        }
+
+        return response;
+    }
 
     private async ValueTask<HttpResponseMessage> GetResponseAsync(
         string url,
         TokenKind tokenKind,
         CancellationToken cancellationToken = default
-    )
-    {
-        return await Http.ResponseResiliencePipeline.ExecuteAsync(
+    ) =>
+        await Http.ResponseResiliencePipeline.ExecuteAsync(
             async innerCancellationToken =>
             {
-                using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(_baseUri, url));
+                var requestUri = new Uri(_baseUri, url);
+                var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 // Don't validate because the token can have special characters
                 // https://github.com/Tyrrrz/DiscordChatExporter/issues/828
-                request.Headers.TryAddWithoutValidation(
-                    "Authorization",
-                    tokenKind == TokenKind.Bot ? $"Bot {token}" : token
+                headers["Authorization"] = tokenKind == TokenKind.Bot ? $"Bot {token}" : token;
+
+                if (tokenKind == TokenKind.Bot)
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                    foreach (var (name, value) in headers)
+                        request.Headers.TryAddWithoutValidation(name, value);
+
+                    return await Http.Client.SendAsync(
+                        request,
+                        HttpCompletionOption.ResponseHeadersRead,
+                        innerCancellationToken
+                    );
+                }
+
+                // add browser headers like x-super-properties and user-agent
+                // discord flags requests that don't look like a real browser
+                try
+                {
+                    // Cache headers from the external API so we don't make this request on every call.
+
+                    if (_cachedBrowserHeaders is null)
+                    {
+                        using var apiReq = new HttpRequestMessage(
+                            HttpMethod.Post,
+                            "https://cordapi.dolfi.es/api/v2/properties/web"
+                        );
+
+                        using var apiRes = await Http.Client.SendAsync(
+                            apiReq,
+                            innerCancellationToken
+                        );
+                        apiRes.EnsureSuccessStatusCode();
+
+                        var apiJson = await apiRes.Content.ReadAsStringAsync(
+                            innerCancellationToken
+                        );
+
+                        using var doc = JsonDocument.Parse(apiJson);
+
+                        var root = doc.RootElement;
+
+                        string xspBase64 = root.GetProperty("encoded").GetString()!;
+
+                        var properties = root.GetProperty("properties");
+
+                        string userAgent = properties
+                            .GetProperty("browser_user_agent")
+                            .GetString()!;
+                        string browserVersion = properties
+                            .GetProperty("browser_version")
+                            .GetString()!;
+                        string osType = properties.GetProperty("os").GetString()!;
+
+                        string chromeMajor = browserVersion.Split('.')[0];
+
+                        var browserHeaders = new Dictionary<string, string>
+                        {
+                            ["sec-ch-ua-platform"] = $"\"{osType}\"",
+                            ["referer"] = "https://discord.com/app",
+                            ["x-debug-options"] = "bugReporterEnabled",
+                            ["accept-language"] = "en-US,en;q=0.9",
+
+                            ["sec-ch-ua"] =
+                                $"\"Chromium\";v=\"{chromeMajor}\", \"Not;A=Brand\";v=\"99\"",
+
+                            ["sec-ch-ua-mobile"] = "?0",
+
+                            ["x-discord-timezone"] = "Europe/Warsaw",
+                            ["x-context-properties"] = "eyJsb2NhdGlvbiI6Ii9hcHAifQ==",
+                            ["x-discord-locale"] = "en-US",
+
+                            ["user-agent"] = userAgent,
+                            ["x-super-properties"] = xspBase64,
+                        };
+
+                        _cachedBrowserHeaders = browserHeaders;
+                    }
+
+                    foreach (var kv in _cachedBrowserHeaders)
+                        headers.TryAdd(kv.Key, kv.Value);
+                }
+                catch {}
+
+                var cloakResponse = await _session.GetAsync(
+                    requestUri.ToString(),
+                    headers: headers,
+                    cancellationToken: innerCancellationToken
                 );
 
-                var response = await Http.Client.SendAsync(
-                    request,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    innerCancellationToken
-                );
+                var response = ToHttpResponseMessage(cloakResponse, requestUri);
 
                 // Discord has advisory rate limits (communicated via response headers), but they are typically
                 // way stricter than the actual rate limits enforced by the server.
@@ -59,12 +162,12 @@ public class DiscordClient(
                 {
                     var remainingRequestCount = response
                         .Headers.TryGetValue("X-RateLimit-Remaining")
-                        ?.Pipe(s => int.Parse(s, CultureInfo.InvariantCulture));
+                        ?.Pipe(s => int.ParseOrNull(s, CultureInfo.InvariantCulture));
 
                     var resetAfterDelay = response
                         .Headers.TryGetValue("X-RateLimit-Reset-After")
-                        ?.Pipe(s => double.Parse(s, CultureInfo.InvariantCulture))
-                        .Pipe(TimeSpan.FromSeconds);
+                        ?.Pipe(s => double.ParseOrNull(s, CultureInfo.InvariantCulture))
+                        ?.Pipe(TimeSpan.FromSeconds);
 
                     // If this was the last request available before hitting the rate limit,
                     // wait out the reset time so that future requests can succeed.
@@ -91,7 +194,6 @@ public class DiscordClient(
             },
             cancellationToken
         );
-    }
 
     private async ValueTask<TokenKind> ResolveTokenKindAsync(
         CancellationToken cancellationToken = default
@@ -161,7 +263,7 @@ public class DiscordClient(
                     $"""
                     Request to '{url}' failed: {response
                         .StatusCode.ToString()
-                        .ToSpaceSeparatedWords()
+                        .SeparateWords(' ')
                         .ToLowerInvariant()}.
                     Response content: {await response.Content.ReadAsStringAsync(
                         cancellationToken
@@ -364,6 +466,7 @@ public class DiscordClient(
             $"guilds/{guildId}/members/{memberId}",
             cancellationToken
         );
+
         return response?.Pipe(j => Member.Parse(j, guildId));
     }
 
@@ -412,14 +515,12 @@ public class DiscordClient(
             ?.GetNonWhiteSpaceStringOrNull()
             ?.Pipe(Snowflake.Parse);
 
-        Channel? parent = null;
-        if (parentId is not null)
-        {
-            // It's possible for the parent channel to be inaccessible, despite the
-            // child channel being accessible.
-            // https://github.com/Tyrrrz/DiscordChatExporter/issues/1108
-            parent = await TryGetChannelAsync(parentId.Value, cancellationToken);
-        }
+        // It's possible for the parent channel to be inaccessible, despite the
+        // child channel being accessible.
+        // https://github.com/Tyrrrz/DiscordChatExporter/issues/1108
+        var parent = parentId is not null
+            ? await TryGetChannelAsync(parentId.Value, cancellationToken)
+            : null;
 
         return Channel.Parse(response.Value, parent);
     }
@@ -607,8 +708,12 @@ public class DiscordClient(
             .SetQueryParameter("after", (after ?? Snowflake.Zero).ToString())
             .Build();
 
-        var response = await GetJsonResponseAsync(url, cancellationToken);
-        var message = response.EnumerateArray().Select(Message.Parse).FirstOrDefault();
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        var message = response.Value.EnumerateArray().Select(Message.Parse).FirstOrDefault();
 
         return message;
     }
@@ -625,8 +730,39 @@ public class DiscordClient(
             .SetQueryParameter("before", before?.ToString())
             .Build();
 
-        var response = await GetJsonResponseAsync(url, cancellationToken);
-        return response.EnumerateArray().Select(Message.Parse).LastOrDefault();
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        return response.Value.EnumerateArray().Select(Message.Parse).LastOrDefault();
+    }
+
+    public async ValueTask<Message?> TryGetMessageAsync(
+        Snowflake channelId,
+        Snowflake messageId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // Use the regular message listing endpoint with the 'around' parameter instead of the
+        // dedicated single-message endpoint, because the latter is not accessible to user tokens.
+        var url = new UrlBuilder()
+            .SetPath($"channels/{channelId}/messages")
+            .SetQueryParameter("around", messageId.ToString())
+            .SetQueryParameter("limit", "1")
+            .Build();
+
+        // Can be null on channels that the user cannot access
+        var response = await TryGetJsonResponseAsync(url, cancellationToken);
+        if (response is null)
+            return null;
+
+        // The endpoint returns messages around the requested ID, so make sure to only return
+        // the message that exactly matches it (it may be absent if it has been deleted).
+        return response
+            .Value.EnumerateArray()
+            .Select(Message.Parse)
+            .FirstOrDefault(m => m.Id == messageId);
     }
 
     public async IAsyncEnumerable<Message> GetMessagesAsync(
@@ -701,7 +837,21 @@ public class DiscordClient(
                     );
                 }
 
-                yield return message;
+                // Some messages, for example thread starter messages, are returned by the API as content-less references.
+                // Try to resolve them to the actual message so that they appear as they do in the Discord client.
+                var actualMessage =
+                    message.Kind == MessageKind.ThreadStarterMessage
+                    && message.Reference?.ChannelId is { } referencedChannelId
+                    && message.Reference?.MessageId is { } referencedMessageId
+                        ? await TryGetMessageAsync(
+                            referencedChannelId,
+                            referencedMessageId,
+                            cancellationToken
+                        )
+                        : null;
+
+                yield return actualMessage ?? message;
+
                 currentAfter = message.Id;
             }
         }
@@ -769,7 +919,20 @@ public class DiscordClient(
                     );
                 }
 
-                yield return message;
+                // Some messages, for example thread starter messages, are returned by the API as content-less references.
+                // Try to resolve them to the actual message so that they appear as they do in the Discord client.
+                var actualMessage =
+                    message.Kind == MessageKind.ThreadStarterMessage
+                    && message.Reference?.ChannelId is { } referencedChannelId
+                    && message.Reference?.MessageId is { } referencedMessageId
+                        ? await TryGetMessageAsync(
+                            referencedChannelId,
+                            referencedMessageId,
+                            cancellationToken
+                        )
+                        : null;
+
+                yield return actualMessage ?? message;
             }
 
             currentBefore = messages.Last().Id;
@@ -820,4 +983,6 @@ public class DiscordClient(
                 yield break;
         }
     }
+
+    public void Dispose() => _session.Dispose();
 }

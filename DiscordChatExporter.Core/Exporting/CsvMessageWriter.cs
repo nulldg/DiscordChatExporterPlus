@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DiscordChatExporter.Core.Discord.Data;
-using DiscordChatExporter.Core.Utils.Extensions;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Core.Exporting;
 
@@ -16,20 +16,17 @@ internal partial class CsvMessageWriter(Stream stream, ExportContext context)
 
     private async ValueTask<string> FormatMarkdownAsync(
         string markdown,
-        CancellationToken cancellationToken = default
-    ) =>
+        CancellationToken cancellationToken = default) =>
         Context.Request.ShouldFormatMarkdown
             ? await PlainTextMarkdownVisitor.FormatAsync(Context, markdown, cancellationToken)
             : markdown;
 
-    public override async ValueTask WritePreambleAsync(
-        CancellationToken cancellationToken = default
-    ) => await _writer.WriteLineAsync("AuthorID,Author,Date,Content,Attachments,Reactions");
+    public override async ValueTask WritePreambleAsync(CancellationToken cancellationToken = default) =>
+        await _writer.WriteLineAsync("AuthorID,Author,Date,Content,Attachments,Reactions");
 
     private async ValueTask WriteAttachmentsAsync(
         IReadOnlyList<Attachment> attachments,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         var buffer = new StringBuilder();
 
@@ -47,8 +44,7 @@ internal partial class CsvMessageWriter(Stream stream, ExportContext context)
 
     private async ValueTask WriteReactionsAsync(
         IReadOnlyList<Reaction> reactions,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         var buffer = new StringBuilder();
 
@@ -70,8 +66,7 @@ internal partial class CsvMessageWriter(Stream stream, ExportContext context)
 
     public override async ValueTask WriteMessageAsync(
         Message message,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         await base.WriteMessageAsync(message, cancellationToken);
 
@@ -90,13 +85,15 @@ internal partial class CsvMessageWriter(Stream stream, ExportContext context)
         // Message content
         if (message.IsSystemNotification)
         {
-            await _writer.WriteAsync(CsvEncode(message.GetFallbackContent()));
+            await _writer.WriteAsync(CsvEncode(
+                message.GetFallbackContent()
+            ));
         }
         else
         {
-            await _writer.WriteAsync(
-                CsvEncode(await FormatMarkdownAsync(message.Content, cancellationToken))
-            );
+            await _writer.WriteAsync(CsvEncode(
+                await FormatMarkdownAsync(message.Content, cancellationToken)
+            ));
         }
 
         await _writer.WriteAsync(',');

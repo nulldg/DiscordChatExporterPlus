@@ -13,7 +13,7 @@ public partial class LocalizationManager
         [nameof(PullGuildsTooltip)] = "Charger les serveurs et canaux disponibles (Entrée)",
         [nameof(SettingsTooltip)] = "Paramètres",
         [nameof(LastMessageSentTooltip)] = "Dernier message envoyé :",
-        [nameof(TokenWatermark)] = "Token",
+        [nameof(TokenPlaceholderText)] = "Token",
         // Token instructions (personal account)
         [nameof(TokenPersonalHeader)] = "Obtenir le token pour votre compte personnel :",
         [nameof(TokenPersonalTosWarning)] =
@@ -44,7 +44,7 @@ public partial class LocalizationManager
             *  Votre bot doit avoir l'option **Message Content Intent** activée pour lire les messages
             """,
         [nameof(TokenHelpText)] =
-            "Pour les questions ou problèmes, veuillez consulter la [documentation](https://github.com/Tyrrrz/DiscordChatExporter/tree/master/.docs)",
+            "Pour les questions ou problèmes, veuillez consulter la [documentation](https://github.com/nulldg/DiscordChatExporterPlus/tree/master/.docs)",
         // Settings
         [nameof(SettingsTitle)] = "Paramètres",
         [nameof(ThemeLabel)] = "Thème",
@@ -129,13 +129,6 @@ public partial class LocalizationManager
         [nameof(CloseButton)] = "FERMER",
         [nameof(CancelButton)] = "ANNULER",
         // Dialog messages
-        [nameof(UkraineSupportTitle)] = "Merci de soutenir l'Ukraine !",
-        [nameof(UkraineSupportMessage)] = """
-            Alors que la Russie mène une guerre génocidaire contre mon pays, je suis reconnaissant envers tous ceux qui continuent à soutenir l'Ukraine dans notre lutte pour la liberté.
-
-            Cliquez sur EN SAVOIR PLUS pour trouver des moyens d'aider.
-            """,
-        [nameof(LearnMoreButton)] = "EN SAVOIR PLUS",
         [nameof(UnstableBuildTitle)] = "Avertissement : version instable",
         [nameof(UnstableBuildMessage)] = """
             Vous utilisez une version de développement de {0}. Ces versions ne sont pas rigoureusement testées et peuvent contenir des bugs.

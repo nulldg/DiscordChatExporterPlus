@@ -13,7 +13,7 @@ public partial class LocalizationManager
         [nameof(PullGuildsTooltip)] = "Verfügbare Server und Kanäle laden (Enter)",
         [nameof(SettingsTooltip)] = "Einstellungen",
         [nameof(LastMessageSentTooltip)] = "Letzte Nachricht gesendet:",
-        [nameof(TokenWatermark)] = "Token",
+        [nameof(TokenPlaceholderText)] = "Token",
         // Token instructions (personal account)
         [nameof(TokenPersonalHeader)] = "Token für Ihr persönliches Konto abrufen:",
         [nameof(TokenPersonalTosWarning)] =
@@ -44,7 +44,7 @@ public partial class LocalizationManager
             *  Ihr Bot benötigt die aktivierte **Message Content Intent**, um Nachrichten zu lesen
             """,
         [nameof(TokenHelpText)] =
-            "Bei Fragen oder Problemen lesen Sie die [Dokumentation](https://github.com/Tyrrrz/DiscordChatExporter/tree/master/.docs)",
+            "Bei Fragen oder Problemen lesen Sie die [Dokumentation](https://github.com/nulldg/DiscordChatExporterPlus/tree/master/.docs)",
         // Settings
         [nameof(SettingsTitle)] = "Einstellungen",
         [nameof(ThemeLabel)] = "Design",
@@ -133,13 +133,6 @@ public partial class LocalizationManager
         [nameof(CloseButton)] = "SCHLIESSEN",
         [nameof(CancelButton)] = "ABBRECHEN",
         // Dialog messages
-        [nameof(UkraineSupportTitle)] = "Danke für Ihre Unterstützung der Ukraine!",
-        [nameof(UkraineSupportMessage)] = """
-            Während Russland einen Vernichtungskrieg gegen mein Land führt, bin ich jedem dankbar, der weiterhin an der Seite der Ukraine in unserem Kampf für die Freiheit steht.
-
-            Klicken Sie auf MEHR ERFAHREN, um Möglichkeiten der Unterstützung zu finden.
-            """,
-        [nameof(LearnMoreButton)] = "MEHR ERFAHREN",
         [nameof(UnstableBuildTitle)] = "Warnung: Instabile Version",
         [nameof(UnstableBuildMessage)] = """
             Sie verwenden eine Entwicklungsversion von {0}. Diese Versionen wurden nicht gründlich getestet und können Fehler enthalten.

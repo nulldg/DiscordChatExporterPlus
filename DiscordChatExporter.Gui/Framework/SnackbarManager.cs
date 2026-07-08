@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Threading;
 using Material.Styles.Controls;
 using Material.Styles.Models;

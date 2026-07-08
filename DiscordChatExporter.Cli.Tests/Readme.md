@@ -1,4 +1,4 @@
-﻿# DiscordChatExporter Tests
+# DiscordChatExporter Tests
 
 This test suite runs against a real Discord server, specifically created to exercise different behaviors required by the test scenarios.
 In order to run these tests locally, you need to join the test server and configure your authentication token.

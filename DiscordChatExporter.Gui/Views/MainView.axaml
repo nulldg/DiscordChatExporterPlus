@@ -1,4 +1,4 @@
-﻿<Window
+<Window
     x:Class="DiscordChatExporter.Gui.Views.MainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -14,10 +14,7 @@
     Icon="/favicon.ico"
     RenderOptions.BitmapInterpolationMode="HighQuality"
     WindowStartupLocation="CenterScreen">
-    <dialogHostAvalonia:DialogHost
-        x:Name="DialogHost"
-        CloseOnClickAway="False"
-        Loaded="DialogHost_OnLoaded">
+    <dialogHostAvalonia:DialogHost x:Name="DialogHost" CloseOnClickAway="False">
         <materialStyles:SnackbarHost HostName="Root" SnackbarMaxCounts="3">
             <ContentControl Content="{Binding Dashboard}" />
         </materialStyles:SnackbarHost>

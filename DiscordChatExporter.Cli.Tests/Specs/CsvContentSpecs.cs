@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using DiscordChatExporter.Cli.Tests.Infra;
 using FluentAssertions;
 using Xunit;
@@ -14,18 +14,16 @@ public class CsvContentSpecs
         var document = await ExportWrapper.ExportAsCsvAsync(ChannelIds.DateRangeTestCases);
 
         // Assert
-        document
-            .Should()
-            .ContainAll(
-                "tyrrrz",
-                "Hello world",
-                "Goodbye world",
-                "Foo bar",
-                "Hurdle Durdle",
-                "One",
-                "Two",
-                "Three",
-                "Yeet"
-            );
+        document.Should().ContainAll(
+            "tyrrrz",
+            "Hello world",
+            "Goodbye world",
+            "Foo bar",
+            "Hurdle Durdle",
+            "One",
+            "Two",
+            "Three",
+            "Yeet"
+        );
     }
 }

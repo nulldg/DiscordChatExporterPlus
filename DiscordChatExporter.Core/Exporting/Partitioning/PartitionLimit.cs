@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -18,14 +18,11 @@ public partial class PartitionLimit
         var match = Regex.Match(value, @"^\s*(\d+[\.,]?\d*)\s*(\w)?b\s*$", RegexOptions.IgnoreCase);
 
         // Number part
-        if (
-            !double.TryParse(
+        if (!double.TryParse(
                 match.Groups[1].Value,
                 NumberStyles.Float,
                 formatProvider,
-                out var number
-            )
-        )
+                out var number))
         {
             return null;
         }
@@ -45,7 +42,7 @@ public partial class PartitionLimit
             return null;
         }
 
-        return (long)(number * magnitude);
+        return (long) (number * magnitude);
     }
 
     public static PartitionLimit? TryParse(string value, IFormatProvider? formatProvider = null)
@@ -61,6 +58,5 @@ public partial class PartitionLimit
     }
 
     public static PartitionLimit Parse(string value, IFormatProvider? formatProvider = null) =>
-        TryParse(value, formatProvider)
-        ?? throw new FormatException($"Invalid partition limit '{value}'.");
+        TryParse(value, formatProvider) ?? throw new FormatException($"Invalid partition limit '{value}'.");
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DiscordChatExporter.Core.Markdown;
 using DiscordChatExporter.Core.Markdown.Parsing;
-using DiscordChatExporter.Core.Utils.Extensions;
+using PowerKit.Extensions;
 
 namespace DiscordChatExporter.Core.Exporting;
 
@@ -162,7 +162,7 @@ internal partial class HtmlMarkdownVisitor(
     )
     {
         var highlightClass = !string.IsNullOrWhiteSpace(multiLineCodeBlock.Language)
-            ? $"language-{multiLineCodeBlock.Language}"
+            ? $"language-{HtmlEncode(multiLineCodeBlock.Language)}"
             : "nohighlight";
 
         buffer.Append(
@@ -217,9 +217,11 @@ internal partial class HtmlMarkdownVisitor(
             <img
                 loading="lazy"
                 class="chatlog__emoji {jumboClass}"
-                alt="{emoji.Name}"
-                title="{emoji.Code}"
-                src="{await context.ResolveAssetUrlAsync(emoji.ImageUrl, cancellationToken)}">
+                alt="{HtmlEncode(emoji.Name)}"
+                title="{HtmlEncode(emoji.Code)}"
+                src="{HtmlEncode(
+                await context.ResolveAssetUrlAsync(emoji.ImageUrl, cancellationToken)
+            )}">
             """
         );
     }
@@ -293,14 +295,8 @@ internal partial class HtmlMarkdownVisitor(
             var name = role?.Name ?? "deleted-role";
             var color = role?.Color;
 
-            var style = color is not null
-                ? $"""
-                    color: rgb({color.Value.R}, {color.Value.G}, {color
-                        .Value
-                        .B}); background-color: rgba({color.Value.R}, {color.Value.G}, {color
-                        .Value
-                        .B}, 0.1);
-                    """
+            var style = color is { } c
+                ? $"color: rgb({c.R}, {c.G}, {c.B}); background-color: rgba({c.R}, {c.G}, {c.B}, 0.1);"
                 : null;
 
             buffer.Append(

@@ -1,7 +1,7 @@
 # Getting started
 
 Welcome to the getting started page!
-Here you'll learn how to use every **DiscordChatExporter** (DCE for short) feature.
+Here you'll learn how to use every **DiscordChatExporterPlus** (DCE for short) feature.
 For other things you can do with DCE, check out the [Guides](Readme.md#guides) section.
 
 If you still have unanswered questions after reading this page or if you have encountered a problem, please visit our [FAQ & Troubleshooting](Troubleshooting.md) section.
@@ -12,12 +12,12 @@ The information presented on this page is valid for **all** platforms.
 
 ![GUI vs CLI](https://i.imgur.com/j9OTxRB.png)
 
-**DCE** has two different versions:
+**DCEp** has two different versions:
 
 - **Graphical User Interface** (**GUI**) - it's the preferred version for newcomers as it is easy to use.
-  You can get it by [downloading](https://github.com/Tyrrrz/DiscordChatExporter/releases/latest) the `DiscordChatExporter.*.zip` file.
+  You can get it by [downloading](https://github.com/nulldg/DiscordChatExporterPlus/releases/latest) the `DiscordChatExporterPlus.*.zip` file.
 - **Command-line Interface** (**CLI**) - offers greater flexibility and more features for advanced users, such as export scheduling, ID lists, and more specific date ranges.
-  You can get it by [downloading](https://github.com/Tyrrrz/DiscordChatExporter/releases/latest) the `DiscordChatExporter.Cli.*.zip` file.
+  You can get it by [downloading](https://github.com/nulldg/DiscordChatExporterPlus/releases/latest) the `DiscordChatExporterPlus.Cli.*.zip` file.
 
 There are dedicated guides for each version:
 
